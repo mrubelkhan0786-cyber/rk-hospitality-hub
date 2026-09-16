@@ -1,24 +1,135 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState, type FormEvent } from "react";
+import { ArrowRight, Check, ChevronDown, ChevronUp, CircleHelp, GraduationCap, House, Menu, MessageCircle, Phone, Send, Sparkles, Users, X, Utensils, MapPin, Star, BookOpen, BriefcaseBusiness, BedDouble, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import heroImage from "@/assets/hero-training.jpg";
+import classroomImage from "@/assets/classroom-learning.jpg";
+import serviceImage from "@/assets/service-training.jpg";
+import hospitalityImage from "@/assets/hospitality-practice.jpg";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const phone = "096665 58858";
+const phoneHref = "tel:09666558858";
+const address = "11-1-KA0008, Maruthi Nagar Road, Armoor Road, Behind Murali Krishna Temple, Nizamabad, Telangana 503002, India";
+const whatsappHref = "https://wa.me/919666558858?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20RK%20College%20of%20Hotel%20Management%20and%20the%20admission%20process.";
+const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+const courses = [
+  { name: "Course Name", description: "Short description of the programme and what students will learn.", duration: "Add duration", eligibility: "Add eligibility" },
+  { name: "Course Name", description: "A second editable programme card for confirmed course details.", duration: "Add duration", eligibility: "Add eligibility" },
+];
+const learningAreas = [
+  { title: "Food Production", text: "Practical culinary and kitchen skills.", icon: Utensils },
+  { title: "Food & Beverage Service", text: "Professional restaurant service skills.", icon: BriefcaseBusiness },
+  { title: "Front Office", text: "Guest interaction fundamentals.", icon: Building2 },
+  { title: "Housekeeping", text: "Cleanliness and hotel operations.", icon: BedDouble },
+  { title: "Hospitality Operations", text: "A broad view of day-to-day service.", icon: House },
+  { title: "Professional Skills", text: "Communication and service habits.", icon: Users },
+];
+const galleryItems = [
+  { category: "Students", caption: "Learning Together", image: classroomImage },
+  { category: "Training", caption: "Practical Training", image: heroImage },
+  { category: "Activities", caption: "Hospitality Training", image: hospitalityImage },
+  { category: "Training", caption: "Food & Beverage Service", image: serviceImage },
+  { category: "Campus", caption: "Learning Environment", image: classroomImage },
+  { category: "Students", caption: "Student Interaction", image: hospitalityImage },
+];
+const quickQuestions = ["What courses are available?", "What is hotel management?", "What are the eligibility requirements?", "How can I enquire about admission?", "Where is the college located?", "What practical training is available?"];
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "RK College of Hotel Management | Nizamabad, Telangana" },
+      { name: "description", content: "Learn more about RK College of Hotel Management in Nizamabad, Telangana, including hotel management education, practical training, courses, student life and admissions." },
+      { property: "og:title", content: "RK College of Hotel Management | Nizamabad, Telangana" },
+      { property: "og:description", content: "Hotel management education, practical training, courses, student life and admissions in Nizamabad, Telangana." },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function HomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
+  const [galleryFilter, setGalleryFilter] = useState("All");
+  const [lightbox, setLightbox] = useState<(typeof galleryItems)[number] | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const filteredGallery = useMemo(() => galleryFilter === "All" ? galleryItems : galleryItems.filter((item) => item.category === galleryFilter), [galleryFilter]);
+  const navItems = ["Home", "About", "Courses", "Faculty", "Students", "Facilities", "Gallery", "Reviews", "Contact"];
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitted(true);
+  }
+
+  return <div className="page-wash min-h-screen overflow-x-hidden font-sans text-foreground">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5 lg:px-8">
+      <div className="frosted-strong mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 rounded-2xl px-4 sm:px-6">
+        <a href="#home" className="flex min-w-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground">RK</span>
+          <span className="max-w-[180px] font-display text-[12px] font-extrabold leading-tight sm:max-w-none sm:text-[14px]">RK College of<br className="sm:hidden" /> Hotel Management</span>
+        </a>
+        <nav className="hidden items-center gap-5 lg:flex">{navItems.map((item) => <a key={item} href={`#${item.toLowerCase()}`} className="text-[12px] font-semibold text-muted-foreground transition-colors hover:text-primary">{item}</a>)}</nav>
+        <div className="flex items-center gap-2">
+          <Button asChild className="hidden rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground hover:bg-primary/90 sm:inline-flex"><a href="#enquiry">Admission Enquiry</a></Button>
+          <Button variant="outline" size="icon" className="rounded-xl border-border bg-card lg:hidden" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Close menu" : "Open menu"}>{menuOpen ? <X /> : <Menu />}</Button>
+        </div>
+      </div>
+      {menuOpen && <nav className="frosted-strong mx-auto mt-2 grid max-w-7xl gap-1 rounded-2xl p-3 lg:hidden">{navItems.map((item) => <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-primary/10">{item}</a>)}<a href="#enquiry" onClick={() => setMenuOpen(false)} className="mt-1 rounded-xl bg-primary px-3 py-2.5 text-center text-sm font-semibold text-primary-foreground">Admission Enquiry</a></nav>}
+    </header>
+
+    <main id="home" className="section-shell space-y-16 py-6 sm:space-y-24 sm:py-10">
+      <section className="frosted-strong rise-in grid overflow-hidden rounded-3xl lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="order-2 p-6 sm:p-10 lg:order-1 lg:flex lg:flex-col lg:justify-center lg:p-14">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary"><MapPin className="size-3.5" /> Nizamabad, Telangana</span>
+          <h1 className="mt-5 max-w-2xl font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">Start Your Career in <span className="text-primary">Hotel Management</span></h1>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">Learn hospitality, develop professional skills and prepare yourself for opportunities in the hotel and hospitality industry.</p>
+          <div className="mt-7 grid max-w-md grid-cols-2 gap-3"><Button asChild className="h-12 rounded-xl bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"><a href="#enquiry">Enquire Now <ArrowRight /></a></Button><Button asChild variant="outline" className="h-12 rounded-xl border-border bg-card text-sm font-semibold text-foreground"><a href="#courses">Explore Courses</a></Button></div>
+        </div>
+        <div className="order-1 min-h-[290px] lg:order-2 lg:min-h-[520px]"><img src={heroImage} alt="Hotel management students practising culinary skills in a training kitchen" width={1440} height={960} className="h-full w-full object-cover" /></div>
+      </section>
+
+      <section id="about" className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+        <div className="overflow-hidden rounded-3xl"><img src={classroomImage} alt="Students learning together in a hospitality classroom" width={992} height={672} loading="lazy" className="h-full min-h-[280px] w-full object-cover" /></div>
+        <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">About the college</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">Welcome to RK College of Hotel Management</h2><p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base">RK College of Hotel Management provides students with an environment to learn the fundamentals of hotel management and hospitality. Students can develop practical knowledge, professional communication and service-related skills as they prepare for their future careers.</p><Button asChild variant="outline" className="mt-6 rounded-xl border-border bg-card font-semibold text-primary"><a href="#contact">About Us <ArrowRight /></a></Button></div>
+      </section>
+
+      <section id="courses"><SectionHeading eyebrow="Learning areas" title="Learn Hotel Management in a Practical Way" text="Explore the subjects and capabilities that make hospitality education practical and career-focused." /><div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{learningAreas.map(({ title, text, icon: Icon }) => <article key={title} className="frosted rounded-2xl p-5 transition-transform duration-300 hover:-translate-y-1"><span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="size-5" /></span><h3 className="mt-4 font-display text-base font-bold">{title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{text}</p></article>)}</div></section>
+
+      <section aria-labelledby="courses-heading"><SectionHeading eyebrow="Editable programme cards" title="Our Courses" text="Exact official course details can be added here when confirmed by the college." headingId="courses-heading" /><div className="mt-7 grid gap-4 lg:grid-cols-2">{courses.map((course, index) => <article key={`${course.name}-${index}`} className="frosted-strong rounded-2xl p-5 sm:p-6"><div className="flex items-start justify-between gap-3"><div><h3 className="font-display text-lg font-bold">{course.name}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{course.description}</p></div><span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">Editable</span></div><dl className="mt-5 grid grid-cols-2 gap-3 text-xs"><div className="rounded-xl bg-secondary p-3"><dt className="text-muted-foreground">Duration</dt><dd className="mt-1 font-semibold">{course.duration}</dd></div><div className="rounded-xl bg-secondary p-3"><dt className="text-muted-foreground">Eligibility</dt><dd className="mt-1 font-semibold">{course.eligibility}</dd></div></dl><Button asChild className="mt-5 w-full rounded-xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"><a href="#enquiry">Enquire Now</a></Button></article>)}</div></section>
+
+      <section id="faculty"><SectionHeading eyebrow="Meet the team" title="Our Faculty" text="Faculty details are ready to be replaced with confirmed names, photographs and specializations." /><div className="mt-7 grid gap-4 sm:grid-cols-2">{["Hospitality / Hotel Management", "Food & Beverage Service"].map((specialization) => <article key={specialization} className="frosted rounded-2xl p-4 sm:p-5"><div className="grid aspect-[4/3] place-items-center overflow-hidden rounded-xl bg-brand-soft"><GraduationCap className="size-12 text-primary/40" /></div><h3 className="mt-4 font-display text-base font-bold">Faculty Member</h3><p className="mt-1 text-xs font-bold text-primary">Hotel Management Faculty</p><p className="mt-2 text-sm text-muted-foreground">Specialization: {specialization}</p></article>)}</div></section>
+
+      <section id="students"><SectionHeading eyebrow="Student life" title="Our Students" text="Placeholder imagery can be replaced with photographs from the college whenever they are available." /><div className="mt-7 grid grid-cols-2 gap-3 lg:grid-cols-4">{galleryItems.slice(0, 4).map((item) => <button key={item.caption} type="button" onClick={() => setLightbox(item)} className="group overflow-hidden rounded-2xl bg-card text-left"><img src={item.image} alt={item.caption} width={992} height={672} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" /><span className="block px-3 py-3 text-xs font-bold">{item.caption}</span></button>)}</div></section>
+
+      <section id="facilities" className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Practical training</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">Practical Hotel Management Training</h2><p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base">Build familiarity with the key areas of hospitality through learning, practice and professional routines.</p><div className="mt-6 space-y-4">{[["Food Production", "Students learn practical culinary and kitchen-related skills.", Utensils], ["Food & Beverage Service", "Develop professional service and restaurant skills.", BriefcaseBusiness], ["Front Office", "Learn guest interaction and front-office fundamentals.", Building2], ["Housekeeping", "Understand cleanliness, organisation and hotel operations.", BedDouble]].map(([title, text, Icon]) => { const TrainingIcon = Icon as typeof Utensils; return <div key={title as string} className="flex gap-3"><span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><TrainingIcon className="size-4" /></span><div><h3 className="text-sm font-bold">{title as string}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{text as string}</p></div></div>; })}</div></div><div className="overflow-hidden rounded-3xl"><img src={serviceImage} alt="Students practising food and beverage service" width={992} height={672} loading="lazy" className="h-full min-h-[320px] w-full object-cover" /></div></section>
+
+      <section><SectionHeading eyebrow="Learning. Practice. Grow." title="Our Facilities & Student Life" text="A simple view of the learning spaces and activities that can be updated with confirmed college information." /><div className="mt-7 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]"><div className="grid grid-cols-2 gap-3"><FacilityCard title="Classroom" icon={BookOpen} /><FacilityCard title="Practical Training" icon={Utensils} /><FacilityCard title="Learning Area" icon={GraduationCap} /><FacilityCard title="Student Activities" icon={Users} /></div><div className="frosted overflow-hidden rounded-2xl"><img src={hospitalityImage} alt="Hospitality students practising front office and housekeeping" width={992} height={672} loading="lazy" className="h-full min-h-[270px] w-full object-cover" /></div></div></section>
+
+      <section id="gallery"><SectionHeading eyebrow="Photo collection" title="College Gallery" text="Placeholder hospitality and education imagery is organised for easy replacement later." /><div className="mt-6 flex flex-wrap gap-2">{["All", "Campus", "Students", "Training", "Activities"].map((filter) => <Button key={filter} type="button" variant={galleryFilter === filter ? "default" : "outline"} size="sm" onClick={() => setGalleryFilter(filter)} className="rounded-full font-semibold">{filter}</Button>)}</div><div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">{filteredGallery.map((item) => <button key={`${item.caption}-${item.category}`} type="button" onClick={() => setLightbox(item)} className="group overflow-hidden rounded-2xl bg-card text-left"><img src={item.image} alt={item.caption} width={992} height={672} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" /><span className="block px-3 py-3 text-xs font-bold">{item.caption}</span></button>)}</div></section>
+
+      <section><SectionHeading eyebrow="A supportive start" title="Why Choose RK College of Hotel Management?" text="General, factual reasons for considering hotel management education." /><div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Practical Learning", "Learn by doing."], ["Hospitality-Focused Education", "Build hospitality awareness."], ["Professional Skills", "Develop communication and service habits."], ["Student Development", "Grow through learning and practice."], ["Career Preparation", "Prepare for future opportunities."], ["Supportive Learning Environment", "Learn with guidance and peers."]].map(([title, text]) => <article key={title} className="frosted rounded-2xl p-5"><Check className="size-5 text-primary" /><h3 className="mt-4 font-display text-sm font-bold">{title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{text}</p></article>)}</div></section>
+
+      <section id="enquiry" className="frosted-strong grid gap-8 rounded-3xl p-6 sm:p-9 lg:grid-cols-[0.8fr_1.2fr] lg:p-12"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Start a conversation</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight">Admission Enquiry</h2><p className="mt-4 text-sm leading-7 text-muted-foreground">Interested in Hotel Management? Get in touch to learn more about courses, eligibility and admission.</p><div className="mt-6 flex flex-col gap-3 text-sm"><a href={phoneHref} className="flex items-center gap-3 font-semibold hover:text-primary"><Phone className="size-4 text-primary" /> {phone}</a><a href={whatsappHref} className="flex items-center gap-3 font-semibold hover:text-primary"><MessageCircle className="size-4 text-success" /> Chat on WhatsApp</a></div></div>{submitted ? <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl bg-primary/10 p-6 text-center"><span className="grid size-12 place-items-center rounded-full bg-success text-success-foreground"><Check /></span><h3 className="mt-4 font-display text-xl font-bold">Thank you for your enquiry</h3><p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Your message is ready for follow-up. The website does not send it to the college until an email or enquiry service is connected.</p><Button type="button" variant="outline" className="mt-5 rounded-xl" onClick={() => setSubmitted(false)}>Send another enquiry</Button></div> : <form onSubmit={handleSubmit} className="grid gap-3" noValidate><input required aria-label="Full Name" placeholder="Full Name" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><input required type="tel" aria-label="Phone Number" placeholder="Phone Number" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><input type="email" aria-label="Email" placeholder="Email" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><select aria-label="Course Interested In" className="h-12 rounded-xl border border-input bg-card px-4 text-sm text-muted-foreground outline-none focus:ring-2 focus:ring-ring"><option>Course Interested In</option><option>Course Name</option></select><textarea aria-label="Message" placeholder="Message" rows={4} className="resize-none rounded-xl border border-input bg-card px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><Button type="submit" className="h-12 rounded-xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90">Submit Enquiry <Send /></Button></form>}</section>
+
+      <section id="reviews"><SectionHeading eyebrow="Google Reviews" title="What learners may say" text="These are sample placeholders, not verified Google reviews. Connect the college’s real profile when available." /><div className="mt-7 grid gap-4 md:grid-cols-3">{[["Reviewer Name", "Review text can be added here after verified feedback is available."], ["Reviewer Name", "A placeholder review card ready for confirmed content."], ["Reviewer Name", "Replace this sample with a real review and date later."]].map(([name, text]) => <article key={name + text} className="frosted rounded-2xl p-5"><div className="flex gap-1 text-accent" aria-label="Sample five star rating">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><p className="mt-4 text-sm leading-6 text-muted-foreground">“{text}”</p><p className="mt-4 text-xs font-bold">{name}</p><p className="mt-1 text-xs text-muted-foreground">Date to be added</p></article>)}</div><Button asChild variant="outline" className="mt-5 rounded-xl border-border bg-card font-semibold text-primary"><a href={mapsHref} target="_blank" rel="noreferrer">View Reviews on Google <ArrowRight /></a></Button></section>
+
+      <section id="contact" className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]"><div className="frosted-strong rounded-3xl p-6 sm:p-9"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Visit or contact us</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight">Contact Us</h2><p className="mt-5 font-display text-lg font-bold">RK College of Hotel Management</p><address className="mt-4 flex gap-3 text-sm not-italic leading-7 text-muted-foreground"><MapPin className="mt-1 size-4 shrink-0 text-primary" />{address}</address><a href={phoneHref} className="mt-4 flex items-center gap-3 text-sm font-semibold"><Phone className="size-4 text-primary" />{phone}</a><div className="mt-7 grid grid-cols-3 gap-2"><Button asChild className="rounded-xl bg-primary text-xs font-semibold text-primary-foreground"><a href={phoneHref}>Call Now</a></Button><Button asChild className="rounded-xl bg-success text-xs font-semibold text-success-foreground hover:bg-success/90"><a href={whatsappHref}>WhatsApp</a></Button><Button asChild variant="outline" className="rounded-xl bg-card text-xs font-semibold"><a href={mapsHref} target="_blank" rel="noreferrer">Directions</a></Button></div></div><div className="frosted-strong min-h-[360px] overflow-hidden rounded-3xl"><iframe title="Map showing RK College of Hotel Management in Nizamabad" src={`https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`} className="h-full min-h-[360px] w-full border-0" loading="lazy" /></div></section>
+
+      <section className="frosted-strong rounded-3xl p-7 text-center sm:p-10"><h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Ready to Start Your Hotel Management Journey?</h2><p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Contact RK College of Hotel Management to learn more about courses and admissions.</p><div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"><Button asChild className="rounded-xl bg-primary text-primary-foreground"><a href="#enquiry">Enquire Now <ArrowRight /></a></Button><Button asChild className="rounded-xl bg-success text-success-foreground hover:bg-success/90"><a href={whatsappHref}>Chat on WhatsApp <MessageCircle /></a></Button></div></section>
+    </main>
+
+    <footer className="border-t border-border/60 bg-card/45 py-10"><div className="section-shell grid gap-8 sm:grid-cols-[1.3fr_1fr_1fr] sm:gap-12"><div><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground">RK</span><p className="font-display text-sm font-extrabold">RK College of Hotel Management</p></div><p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Nizamabad, Telangana · {phone}</p></div><div><h2 className="text-sm font-bold">Quick Links</h2><div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted-foreground">{navItems.map((item) => <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-primary">{item}</a>)}</div></div><div><h2 className="text-sm font-bold">Contact</h2><a href={phoneHref} className="mt-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"><Phone className="size-4" />{phone}</a><p className="mt-3 flex items-start gap-2 text-sm leading-6 text-muted-foreground"><MapPin className="mt-1 size-4 shrink-0" />Nizamabad, Telangana</p></div></div><div className="section-shell mt-8 border-t border-border/60 pt-5 text-xs text-muted-foreground">© 2026 RK College of Hotel Management. All rights reserved.</div></footer>
+
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3"><a href={whatsappHref} aria-label="Chat on WhatsApp" className="flex h-12 items-center gap-2 rounded-full bg-success px-4 text-xs font-bold text-success-foreground shadow-lg transition-transform hover:-translate-y-0.5"><MessageCircle className="size-5" /><span className="hidden sm:inline">Chat on WhatsApp</span></a><Button type="button" aria-expanded={chatOpen} onClick={() => setChatOpen((open) => !open)} className="h-12 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-lg hover:bg-primary/90"><Sparkles className="size-4" />Ask AI</Button></div>
+    {chatOpen && <AssistantPanel activeQuestion={activeQuestion} setActiveQuestion={setActiveQuestion} onClose={() => setChatOpen(false)} />}
+    {lightbox && <div role="dialog" aria-modal="true" aria-label={lightbox.caption} className="fixed inset-0 z-[60] grid place-items-center bg-foreground/75 p-4" onClick={() => setLightbox(null)}><div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-card" onClick={(event) => event.stopPropagation()}><Button type="button" variant="outline" size="icon" aria-label="Close image" onClick={() => setLightbox(null)} className="absolute right-3 top-3 z-10 rounded-full bg-card"><X /></Button><img src={lightbox.image} alt={lightbox.caption} width={992} height={672} className="max-h-[78vh] w-full object-contain" /><p className="p-4 text-sm font-bold">{lightbox.caption}</p></div></div>}
+  </div>;
 }
+
+function SectionHeading({ eyebrow, title, text, headingId }: { eyebrow: string; title: string; text: string; headingId?: string }) { return <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{eyebrow}</p><h2 id={headingId} className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2><p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">{text}</p></div>; }
+function FacilityCard({ title, icon: Icon }: { title: string; icon: typeof BookOpen }) { return <article className="frosted rounded-2xl p-5"><Icon className="size-5 text-primary" /><h3 className="mt-4 text-sm font-bold">{title}</h3><p className="mt-1.5 text-xs leading-5 text-muted-foreground">Details to be confirmed and updated.</p></article>; }
+function AssistantPanel({ activeQuestion, setActiveQuestion, onClose }: { activeQuestion: string | null; setActiveQuestion: (question: string) => void; onClose: () => void }) { return <aside className="frosted-strong fixed bottom-20 right-4 z-50 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl" aria-label="RK College AI Assistant"><div className="flex items-center justify-between bg-primary p-4 text-primary-foreground"><div><p className="font-display text-sm font-bold">RK College AI Assistant</p><p className="mt-0.5 text-[11px] text-primary-foreground/80">Ask us anything about the college</p></div><Button type="button" variant="ghost" size="icon" aria-label="Close assistant" onClick={onClose} className="text-primary-foreground hover:bg-primary-foreground/10"><X /></Button></div><div className="max-h-[55vh] space-y-3 overflow-y-auto p-4"><div className="rounded-xl bg-secondary p-3 text-xs leading-5 text-secondary-foreground">{activeQuestion ? answerFor(activeQuestion) : "Please choose a question below. I’ll only share information available on this website."}</div><div className="grid gap-2">{quickQuestions.map((question) => <button key={question} type="button" onClick={() => setActiveQuestion(question)} className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5 text-left text-xs font-semibold transition-colors hover:bg-primary/10">{question}<ChevronDown className="size-3.5 text-primary" /></button>)}</div></div></aside>; }
+function answerFor(question: string) { if (question.includes("located")) return `The college is at ${address}.`; if (question.includes("contact")) return `You can call RK College of Hotel Management at ${phone}.`; if (question.includes("practical")) return "The website describes learning areas including food production, food and beverage service, front office, housekeeping, hospitality operations and professional skills."; if (question.includes("hotel management")) return "Hotel management education introduces students to hospitality, professional communication, service and practical hotel operations."; if (question.includes("courses")) return "Course cards are available on the website, but exact official course names, durations and eligibility details have not yet been provided."; return `The latest eligibility information is not available here. Please contact RK College of Hotel Management at ${phone} for the latest information.`; }

@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, type FormEvent } from "react";
-import { ArrowRight, Check, ChevronDown, ChevronUp, CircleHelp, GraduationCap, House, Menu, MessageCircle, Phone, Send, Sparkles, Users, X, Utensils, MapPin, Star, BookOpen, BriefcaseBusiness, BedDouble, Building2 } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, GraduationCap, House, Menu, MessageCircle, Phone, Send, Sparkles, Users, X, Utensils, MapPin, Star, BookOpen, BriefcaseBusiness, BedDouble, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-training.jpg";
 import classroomImage from "@/assets/classroom-learning.jpg";
 import serviceImage from "@/assets/service-training.jpg";

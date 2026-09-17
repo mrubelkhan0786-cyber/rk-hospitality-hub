@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, type FormEvent } from "react";
-import { ArrowRight, Check, ChevronDown, ChevronUp, CircleHelp, GraduationCap, House, Menu, MessageCircle, Phone, Send, Sparkles, Users, X, Utensils, MapPin, Star, BookOpen, BriefcaseBusiness, BedDouble, Building2 } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, GraduationCap, House, Menu, MessageCircle, Phone, Send, Sparkles, Users, X, Utensils, MapPin, Star, BookOpen, BriefcaseBusiness, BedDouble, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-training.jpg";
 import classroomImage from "@/assets/classroom-learning.jpg";
 import serviceImage from "@/assets/service-training.jpg";
@@ -56,11 +58,37 @@ function HomePage() {
   const [galleryFilter, setGalleryFilter] = useState("All");
   const [lightbox, setLightbox] = useState<(typeof galleryItems)[number] | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const filteredGallery = useMemo(() => galleryFilter === "All" ? galleryItems : galleryItems.filter((item) => item.category === galleryFilter), [galleryFilter]);
   const navItems = ["Home", "About", "Courses", "Faculty", "Students", "Facilities", "Gallery", "Reviews", "Contact"];
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const coursesQuery = useQuery({
+    queryKey: ["courses"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("courses").select("id, name, description, duration, eligibility").order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+  const courseList = coursesQuery.data?.length ? coursesQuery.data : courses;
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    setSending(true);
+    setFormError(null);
+    const { error } = await supabase.from("enquiries").insert({
+      full_name: String(values.get("full_name") ?? ""),
+      phone: String(values.get("phone") ?? ""),
+      email: String(values.get("email") ?? "") || null,
+      course: String(values.get("course") ?? "") || null,
+      message: String(values.get("message") ?? "") || null,
+    });
+    setSending(false);
+    if (error) { setFormError("We could not send your enquiry just now. Please call us on " + phone + "."); return; }
+    form.reset();
     setSubmitted(true);
   }
 
@@ -114,7 +142,7 @@ function HomePage() {
 
       <section id="enquiry" className="frosted-strong grid gap-8 rounded-3xl p-6 sm:p-9 lg:grid-cols-[0.8fr_1.2fr] lg:p-12"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Start a conversation</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight">Admission Enquiry</h2><p className="mt-4 text-sm leading-7 text-muted-foreground">Interested in Hotel Management? Get in touch to learn more about courses, eligibility and admission.</p><div className="mt-6 flex flex-col gap-3 text-sm"><a href={phoneHref} className="flex items-center gap-3 font-semibold hover:text-primary"><Phone className="size-4 text-primary" /> {phone}</a><a href={whatsappHref} className="flex items-center gap-3 font-semibold hover:text-primary"><MessageCircle className="size-4 text-success" /> Chat on WhatsApp</a></div></div>{submitted ? <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl bg-primary/10 p-6 text-center"><span className="grid size-12 place-items-center rounded-full bg-success text-success-foreground"><Check /></span><h3 className="mt-4 font-display text-xl font-bold">Thank you for your enquiry</h3><p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Your message is ready for follow-up. The website does not send it to the college until an email or enquiry service is connected.</p><Button type="button" variant="outline" className="mt-5 rounded-xl" onClick={() => setSubmitted(false)}>Send another enquiry</Button></div> : <form onSubmit={handleSubmit} className="grid gap-3" noValidate><input required aria-label="Full Name" placeholder="Full Name" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><input required type="tel" aria-label="Phone Number" placeholder="Phone Number" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><input type="email" aria-label="Email" placeholder="Email" className="h-12 rounded-xl border border-input bg-card px-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><select aria-label="Course Interested In" className="h-12 rounded-xl border border-input bg-card px-4 text-sm text-muted-foreground outline-none focus:ring-2 focus:ring-ring"><option>Course Interested In</option><option>Course Name</option></select><textarea aria-label="Message" placeholder="Message" rows={4} className="resize-none rounded-xl border border-input bg-card px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring" /><Button type="submit" className="h-12 rounded-xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90">Submit Enquiry <Send /></Button></form>}</section>
 
-      <section id="reviews"><SectionHeading eyebrow="Google Reviews" title="What learners may say" text="These are sample placeholders, not verified Google reviews. Connect the college’s real profile when available." /><div className="mt-7 grid gap-4 md:grid-cols-3">{[["Reviewer Name", "Review text can be added here after verified feedback is available."], ["Reviewer Name", "A placeholder review card ready for confirmed content."], ["Reviewer Name", "Replace this sample with a real review and date later."]].map(([name, text]) => <article key={name + text} className="frosted rounded-2xl p-5"><div className="flex gap-1 text-accent" aria-label="Sample five star rating">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><p className="mt-4 text-sm leading-6 text-muted-foreground">“{text}”</p><p className="mt-4 text-xs font-bold">{name}</p><p className="mt-1 text-xs text-muted-foreground">Date to be added</p></article>)}</div><Button asChild variant="outline" className="mt-5 rounded-xl border-border bg-card font-semibold text-primary"><a href={mapsHref} target="_blank" rel="noreferrer">View Reviews on Google <ArrowRight /></a></Button></section>
+      <section id="reviews"><SectionHeading eyebrow="Google Reviews" title="What learners may say" text="These are sample placeholders, not verified Google reviews. Connect the college’s real profile when available." /><div className="mt-7 grid gap-4 md:grid-cols-3">{[{ name: "Reviewer Name", text: "Review text can be added here after verified feedback is available." }, { name: "Reviewer Name", text: "A placeholder review card ready for confirmed content." }, { name: "Reviewer Name", text: "Replace this sample with a real review and date later." }].map(({ name, text }) => <article key={name + text} className="frosted rounded-2xl p-5"><div className="flex gap-1 text-accent" aria-label="Sample five star rating">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-4 fill-current" />)}</div><p className="mt-4 text-sm leading-6 text-muted-foreground">“{text}”</p><p className="mt-4 text-xs font-bold">{name}</p><p className="mt-1 text-xs text-muted-foreground">Date to be added</p></article>)}</div><Button asChild variant="outline" className="mt-5 rounded-xl border-border bg-card font-semibold text-primary"><a href={mapsHref} target="_blank" rel="noreferrer">View Reviews on Google <ArrowRight /></a></Button></section>
 
       <section id="contact" className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]"><div className="frosted-strong rounded-3xl p-6 sm:p-9"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Visit or contact us</p><h2 className="mt-3 font-display text-3xl font-bold tracking-tight">Contact Us</h2><p className="mt-5 font-display text-lg font-bold">RK College of Hotel Management</p><address className="mt-4 flex gap-3 text-sm not-italic leading-7 text-muted-foreground"><MapPin className="mt-1 size-4 shrink-0 text-primary" />{address}</address><a href={phoneHref} className="mt-4 flex items-center gap-3 text-sm font-semibold"><Phone className="size-4 text-primary" />{phone}</a><div className="mt-7 grid grid-cols-3 gap-2"><Button asChild className="rounded-xl bg-primary text-xs font-semibold text-primary-foreground"><a href={phoneHref}>Call Now</a></Button><Button asChild className="rounded-xl bg-success text-xs font-semibold text-success-foreground hover:bg-success/90"><a href={whatsappHref}>WhatsApp</a></Button><Button asChild variant="outline" className="rounded-xl bg-card text-xs font-semibold"><a href={mapsHref} target="_blank" rel="noreferrer">Directions</a></Button></div></div><div className="frosted-strong min-h-[360px] overflow-hidden rounded-3xl"><iframe title="Map showing RK College of Hotel Management in Nizamabad" src={`https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`} className="h-full min-h-[360px] w-full border-0" loading="lazy" /></div></section>
 

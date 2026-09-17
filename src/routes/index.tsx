@@ -58,11 +58,37 @@ function HomePage() {
   const [galleryFilter, setGalleryFilter] = useState("All");
   const [lightbox, setLightbox] = useState<(typeof galleryItems)[number] | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const filteredGallery = useMemo(() => galleryFilter === "All" ? galleryItems : galleryItems.filter((item) => item.category === galleryFilter), [galleryFilter]);
   const navItems = ["Home", "About", "Courses", "Faculty", "Students", "Facilities", "Gallery", "Reviews", "Contact"];
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const coursesQuery = useQuery({
+    queryKey: ["courses"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("courses").select("id, name, description, duration, eligibility").order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+  const courseList = coursesQuery.data?.length ? coursesQuery.data : courses;
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    setSending(true);
+    setFormError(null);
+    const { error } = await supabase.from("enquiries").insert({
+      full_name: String(values.get("full_name") ?? ""),
+      phone: String(values.get("phone") ?? ""),
+      email: String(values.get("email") ?? "") || null,
+      course: String(values.get("course") ?? "") || null,
+      message: String(values.get("message") ?? "") || null,
+    });
+    setSending(false);
+    if (error) { setFormError("We could not send your enquiry just now. Please call us on " + phone + "."); return; }
+    form.reset();
     setSubmitted(true);
   }
 
